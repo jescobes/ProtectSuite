@@ -1,0 +1,14 @@
+{
+	"serverUrl": "https://adrms.contoso.com/_wmcs/Certification",
+	"useModernAuth": false,
+	"username": "",
+	"password": "",
+	"domain": "",
+	"applicationId": "",
+	"tenantId": "",
+	"certificateThumbprint": "",
+	"useProxy": false,
+	"proxyUrl": ""
+}
+
+

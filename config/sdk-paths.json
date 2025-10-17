@@ -1,0 +1,24 @@
+{
+  "msipc": {
+    "sdkPath": "D:\\Program Files\\SDKs\\MSIPC",
+    "includePath": "D:\\Program Files\\SDKs\\MSIPC\\inc",
+    "libPath": "D:\\Program Files\\SDKs\\MSIPC\\lib",
+    "binPath": "D:\\Program Files\\SDKs\\MSIPC\\bin",
+    "redistPath": "D:\\Program Files\\SDKs\\MSIPC\\redist"
+  },
+  "mip": {
+    "sdkPath": "D:\\Program Files\\SDKs\\MIP",
+    "includePath": "D:\\Program Files\\SDKs\\MIP\\include",
+    "libPath": "D:\\Program Files\\SDKs\\MIP\\lib",
+    "binPath": "D:\\Program Files\\SDKs\\MIP\\bin"
+  },
+  "buildTools": {
+    "msbuildPath": "D:\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+    "vcPath": "D:\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207",
+    "windowsSdkPath": "C:\\Program Files (x86)\\Windows Kits\\10"
+  },
+  "environment": {
+    "useEnvironmentVariables": true,
+    "fallbackToHardcoded": true
+  }
+}

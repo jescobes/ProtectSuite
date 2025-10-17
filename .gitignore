@@ -1,0 +1,118 @@
+# ProtectSuite .gitignore
+
+# Build outputs
+bin/
+obj/
+out/
+x64/
+x86/
+Debug/
+Release/
+Debug64/
+Release64/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+*.userosscache
+*.sln.docstates
+
+# MSBuild
+*.log
+*.tlog
+*.lastbuildstate
+*.unsuccessfulbuild
+*.vcxproj.filters
+*.vcxproj.user
+
+# Visual Studio Code
+.vscode/settings.json
+.vscode/launch.json.user
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# .NET
+*.dll
+*.exe
+*.pdb
+*.cache
+*.tmp
+*.temp
+
+# C++
+*.obj
+*.o
+*.ilk
+*.meta
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs_vista.db
+
+# SDKs (exclude from repo, use config instead)
+# Uncomment if you want to include SDK files
+# D:\Program Files\SDKs\
+# C:\Program Files\SDKs\
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE specific
+*.swp
+*.swo
+*~

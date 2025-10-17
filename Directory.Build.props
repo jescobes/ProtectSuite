@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- ProtectSuite Directory.Build.props -->
+  <!-- This file provides portable SDK path resolution for all projects -->
+  
+  <PropertyGroup>
+    <!-- SDK Path Resolution -->
+    <MsipcSdkDir Condition="'$(MSIPC_SDK_PATH)' != ''">$(MSIPC_SDK_PATH)</MsipcSdkDir>
+    <MsipcSdkDir Condition="'$(MSIPC_SDK_PATH)' == '' AND '$(MsipcSdkDir)' == ''">D:\Program Files\SDKs\MSIPC</MsipcSdkDir>
+    
+    <MipSdkDir Condition="'$(MIP_SDK_PATH)' != ''">$(MIP_SDK_PATH)</MipSdkDir>
+    <MipSdkDir Condition="'$(MIP_SDK_PATH)' == '' AND '$(MipSdkDir)' == ''">D:\Program Files\SDKs\MIP</MipSdkDir>
+    
+    <!-- Build Tools Path Resolution -->
+    <MSBuildPath Condition="'$(MSBUILD_PATH)' != ''">$(MSBUILD_PATH)</MSBuildPath>
+    <MSBuildPath Condition="'$(MSBUILD_PATH)' == '' AND '$(MSBuildPath)' == ''">D:\BuildTools\MSBuild\Current\Bin\MSBuild.exe</MSBuildPath>
+    
+    <!-- Windows SDK Path Resolution -->
+    <WindowsSdkDir Condition="'$(WINDOWS_SDK_PATH)' != ''">$(WINDOWS_SDK_PATH)</WindowsSdkDir>
+    <WindowsSdkDir Condition="'$(WINDOWS_SDK_PATH)' == '' AND '$(WindowsSdkDir)' == ''">C:\Program Files (x86)\Windows Kits\10</WindowsSdkDir>
+    
+    <!-- Derived Paths -->
+    <MsipcIncludeDir>$(MsipcSdkDir)\inc</MsipcIncludeDir>
+    <MsipcLibDir>$(MsipcSdkDir)\lib</MsipcLibDir>
+    <MsipcBinDir>$(MsipcSdkDir)\bin</MsipcBinDir>
+    <MsipcRedistDir>$(MsipcSdkDir)\redist</MsipcRedistDir>
+    
+    <MipIncludeDir>$(MipSdkDir)\include</MipIncludeDir>
+    <MipLibDir>$(MipSdkDir)\lib</MipLibDir>
+    <MipBinDir>$(MipSdkDir)\bin</MipBinDir>
+    
+    <!-- Common Properties -->
+    <PlatformTarget Condition="'$(Platform)' == 'x64'">x64</PlatformTarget>
+    <PlatformTarget Condition="'$(Platform)' == 'AnyCPU'">AnyCPU</PlatformTarget>
+    
+    <!-- Output Paths -->
+    <OutputPath Condition="'$(Configuration)' == 'Debug64'">bin\Debug64\$(PlatformTarget)\</OutputPath>
+    <OutputPath Condition="'$(Configuration)' == 'Release64'">bin\Release64\$(PlatformTarget)\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)' == ''">bin\$(Configuration)\$(PlatformTarget)\</OutputPath>
+  </PropertyGroup>
+  
+  <!-- SDK Path Validation -->
+  <Target Name="ValidateSdkPaths" BeforeTargets="Build">
+    <Warning Condition="!Exists('$(MsipcSdkDir)')" Text="MSIPC SDK not found at: $(MsipcSdkDir). Please set MSIPC_SDK_PATH environment variable or update config/sdk-paths.json" />
+    <Warning Condition="!Exists('$(MipSdkDir)')" Text="MIP SDK not found at: $(MipSdkDir). Please set MIP_SDK_PATH environment variable or update config/sdk-paths.json" />
+    <Warning Condition="!Exists('$(MSBuildPath)')" Text="MSBuild not found at: $(MSBuildPath). Please set MSBUILD_PATH environment variable or update config/sdk-paths.json" />
+  </Target>
+  
+  <!-- SDK Path Information -->
+  <Target Name="ShowSdkPaths" BeforeTargets="Build" Condition="'$(ShowSdkPaths)' == 'true'">
+    <Message Text="MSIPC SDK: $(MsipcSdkDir)" Importance="high" />
+    <Message Text="MIP SDK: $(MipSdkDir)" Importance="high" />
+    <Message Text="MSBuild: $(MSBuildPath)" Importance="high" />
+    <Message Text="Windows SDK: $(WindowsSdkDir)" Importance="high" />
+  </Target>
+</Project>

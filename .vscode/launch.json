@@ -1,0 +1,55 @@
+{
+  // VS Code debug configurations for MSIPC C# WinForms
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Msipc.CSharp.WinForms Debug64",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/Msipc.CSharp.WinForms/bin/Debug64/Msipc.CSharp.WinForms.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/Msipc.CSharp.WinForms",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "env": {},
+      "windows": {
+        "program": "${workspaceFolder}\\Msipc.CSharp.WinForms\\bin\\Debug64\\Msipc.CSharp.WinForms.exe"
+      }
+    },
+    {
+      "name": "Msipc.CSharp.WinForms Release64",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/Msipc.CSharp.WinForms/bin/Release64/Msipc.CSharp.WinForms.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}/Msipc.CSharp.WinForms",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "env": {},
+      "windows": {
+        "program": "${workspaceFolder}\\Msipc.CSharp.WinForms\\bin\\Release64\\Msipc.CSharp.WinForms.exe"
+      }
+    },
+    {
+      "name": "Msipc.Cpp.Win32 Debug64",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\Msipc.Cpp.Win32\\bin\\Debug64\\x64\\Msipc.Cpp.Win32.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}\\Msipc.Cpp.Win32",
+      "stopAtEntry": false,
+      "environment": []
+    },
+    {
+      "name": "Msipc.Cpp.Win32 Release64",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\Msipc.Cpp.Win32\\bin\\Release64\\x64\\Msipc.Cpp.Win32.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}\\Msipc.Cpp.Win32",
+      "stopAtEntry": false,
+      "environment": []
+    }
+  ]
+}
+
