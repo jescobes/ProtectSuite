@@ -1,0 +1,27 @@
+#include <windows.h>
+#include <commctrl.h>
+#include "resource.h"
+
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 650, 500
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "MIP C++ - File Protection"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT       "File:", -1, 20, 20, 40, 10
+    EDITTEXT    IDC_EDIT_FILE, 20, 35, 500, 14, ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON  "Browse...", IDC_BTN_BROWSE, 530, 33, 100, 18
+
+    GROUPBOX    "Protection Options", IDC_GRP_PROTECTION, 20, 65, 610, 100
+    LTEXT       "Template ID (optional):", IDC_LBL_TEMPLATE_ID, 30, 85, 150, 10
+    EDITTEXT    IDC_EDIT_TEMPLATE_ID, 30, 100, 280, 14, ES_AUTOHSCROLL
+    LTEXT       "Label ID (optional):", IDC_LBL_LABEL_ID, 330, 85, 150, 10
+    EDITTEXT    IDC_EDIT_LABEL_ID, 330, 100, 280, 14, ES_AUTOHSCROLL
+
+    LTEXT       "Actions:", -1, 20, 180, 50, 10
+    PUSHBUTTON  "Protect",   IDC_BTN_PROTECT, 20, 195, 120, 30
+    PUSHBUTTON  "Unprotect", IDC_BTN_UNPROTECT, 150, 195, 120, 30
+    PUSHBUTTON  "Get Info",  IDC_BTN_GETINFO, 280, 195, 120, 30
+
+    LTEXT       "Result:", -1, 20, 240, 50, 10
+    EDITTEXT    IDC_EDIT_LOG, 20, 255, 610, 220, ES_AUTOVSCROLL | ES_MULTILINE | ES_READONLY | WS_VSCROLL
+END

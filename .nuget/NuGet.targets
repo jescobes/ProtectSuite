@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Sobrescribir targets de NuGet para deshabilitar restore -->
+  <Target Name="Restore" />
+  <Target Name="RestorePackages" />
+</Project>
