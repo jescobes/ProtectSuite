@@ -2,92 +2,390 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Mip.CppBridge.WinForms
 {
-    public class MainForm : Form
+    public partial class MainForm : Form
     {
         [DllImport("Mip.NativeBridge.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private static extern int mip_init();
 
         [DllImport("Mip.NativeBridge.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern int mip_protect([MarshalAs(UnmanagedType.LPWStr)] string inFile, [MarshalAs(UnmanagedType.LPWStr)] string outFile);
+        private static extern int mip_protect(
+            [MarshalAs(UnmanagedType.LPWStr)] string inFile,
+            [MarshalAs(UnmanagedType.LPWStr)] string outFile,
+            [MarshalAs(UnmanagedType.LPWStr)] string templateId,
+            [MarshalAs(UnmanagedType.LPWStr)] string labelId);
 
         [DllImport("Mip.NativeBridge.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern int mip_unprotect([MarshalAs(UnmanagedType.LPWStr)] string inFile, [MarshalAs(UnmanagedType.LPWStr)] string outFile);
+        private static extern int mip_unprotect(
+            [MarshalAs(UnmanagedType.LPWStr)] string inFile,
+            [MarshalAs(UnmanagedType.LPWStr)] string outFile);
 
         [DllImport("Mip.NativeBridge.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        private static extern int mip_getinfo([MarshalAs(UnmanagedType.LPWStr)] string inFile, StringBuilder info, int capacity);
+        private static extern int mip_getinfo(
+            [MarshalAs(UnmanagedType.LPWStr)] string inFile,
+            StringBuilder info,
+            int capacity);
 
-        private TextBox _file;
-        private TextBox _log;
+        [DllImport("Mip.NativeBridge.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void mip_cleanup();
+
+        private TextBox txtFilePath;
+        private TextBox txtResult;
+        private TextBox txtTemplateId;
+        private TextBox txtLabelId;
+        private Button btnSelectFile;
+        private Button btnProtect;
+        private Button btnUnprotect;
+        private Button btnGetInfo;
+        private Label lblFile;
+        private Label lblResult;
+        private Label lblTemplateId;
+        private Label lblLabelId;
+        private GroupBox grpProtection;
+
+        private string selectedFilePath;
 
         public MainForm()
         {
-            Text = "MIP C++ Bridge - WinForms";
-            Width = 600; Height = 420; StartPosition = FormStartPosition.CenterScreen;
+            InitializeComponent();
+            InitializeMip();
+        }
 
-            var btnBrowse = new Button { Text = "Browse...", Left = 480, Top = 20, Width = 80 };
-            var lblFile = new Label { Text = "File:", Left = 20, Top = 4, Width = 80 };
-            _file = new TextBox { Left = 20, Top = 22, Width = 450, ReadOnly = true };
+        private void InitializeComponent()
+        {
+            this.Text = "MIP C++ Bridge - WinForms";
+            this.Width = 700;
+            this.Height = 550;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
 
-            var btnProtect = new Button { Text = "Protect", Left = 20, Top = 60, Width = 90 };
-            var btnUnprotect = new Button { Text = "Unprotect", Left = 120, Top = 60, Width = 90 };
-            var btnInfo = new Button { Text = "Get Info", Left = 220, Top = 60, Width = 90 };
-
-            var lblLog = new Label { Text = "Result:", Left = 20, Top = 95, Width = 80 };
-            _log = new TextBox { Left = 20, Top = 115, Width = 540, Height = 250, Multiline = true, ScrollBars = ScrollBars.Vertical, ReadOnly = true };
-
-            Controls.Add(lblFile); Controls.Add(_file); Controls.Add(btnBrowse);
-            Controls.Add(btnProtect); Controls.Add(btnUnprotect); Controls.Add(btnInfo);
-            Controls.Add(lblLog); Controls.Add(_log);
-
-            btnBrowse.Click += (s, e) =>
+            // File selection
+            this.lblFile = new Label
             {
-                using var ofd = new OpenFileDialog { Filter = "All Files (*.*)|*.*" };
-                if (ofd.ShowDialog(this) == DialogResult.OK) { _file.Text = ofd.FileName; Log($"Selected: {ofd.FileName}"); }
+                Text = "File:",
+                Left = 20,
+                Top = 20,
+                Width = 80,
+                Height = 20
             };
 
-            btnProtect.Click += (s, e) =>
+            this.txtFilePath = new TextBox
             {
-                if (string.IsNullOrWhiteSpace(_file.Text)) { Log("Select a file first."); return; }
-                var outFile = System.IO.Path.ChangeExtension(_file.Text, ".mip.pfile");
-                var rc = mip_protect(_file.Text, outFile);
-                Log(rc == 0 ? $"Protected -> {outFile}" : $"Protect failed rc={rc}");
+                Left = 20,
+                Top = 45,
+                Width = 500,
+                Height = 25,
+                ReadOnly = true
             };
 
-            btnUnprotect.Click += (s, e) =>
+            this.btnSelectFile = new Button
             {
-                if (string.IsNullOrWhiteSpace(_file.Text)) { Log("Select a file first."); return; }
-                var outFile = System.IO.Path.ChangeExtension(_file.Text, ".mip.unprot");
-                var rc = mip_unprotect(_file.Text, outFile);
-                Log(rc == 0 ? $"Unprotected -> {outFile}" : $"Unprotect failed rc={rc}");
+                Text = "Browse...",
+                Left = 530,
+                Top = 43,
+                Width = 100,
+                Height = 30
             };
 
-            btnInfo.Click += (s, e) =>
+            // Protection options
+            this.grpProtection = new GroupBox
             {
-                if (string.IsNullOrWhiteSpace(_file.Text)) { Log("Select a file first."); return; }
-                var sb = new StringBuilder(2048);
-                var rc = mip_getinfo(_file.Text, sb, sb.Capacity);
-                Log(rc == 0 ? sb.ToString() : $"GetInfo failed rc={rc}");
+                Text = "Protection Options",
+                Left = 20,
+                Top = 85,
+                Width = 610,
+                Height = 100
             };
 
+            this.lblTemplateId = new Label
+            {
+                Text = "Template ID (optional):",
+                Left = 10,
+                Top = 25,
+                Width = 150,
+                Height = 20
+            };
+
+            this.txtTemplateId = new TextBox
+            {
+                Left = 10,
+                Top = 50,
+                Width = 280,
+                Height = 25
+            };
+
+            this.lblLabelId = new Label
+            {
+                Text = "Label ID (optional):",
+                Left = 310,
+                Top = 25,
+                Width = 150,
+                Height = 20
+            };
+
+            this.txtLabelId = new TextBox
+            {
+                Left = 310,
+                Top = 50,
+                Width = 280,
+                Height = 25
+            };
+
+            this.grpProtection.Controls.Add(this.lblTemplateId);
+            this.grpProtection.Controls.Add(this.txtTemplateId);
+            this.grpProtection.Controls.Add(this.lblLabelId);
+            this.grpProtection.Controls.Add(this.txtLabelId);
+
+            // Action buttons
+            this.btnProtect = new Button
+            {
+                Text = "Protect",
+                Left = 20,
+                Top = 200,
+                Width = 120,
+                Height = 35
+            };
+
+            this.btnUnprotect = new Button
+            {
+                Text = "Unprotect",
+                Left = 150,
+                Top = 200,
+                Width = 120,
+                Height = 35
+            };
+
+            this.btnGetInfo = new Button
+            {
+                Text = "Get Info",
+                Left = 280,
+                Top = 200,
+                Width = 120,
+                Height = 35
+            };
+
+            // Result log
+            this.lblResult = new Label
+            {
+                Text = "Result:",
+                Left = 20,
+                Top = 250,
+                Width = 80,
+                Height = 20
+            };
+
+            this.txtResult = new TextBox
+            {
+                Left = 20,
+                Top = 275,
+                Width = 610,
+                Height = 200,
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                ReadOnly = true,
+                Font = new System.Drawing.Font("Consolas", 9)
+            };
+
+            // Add controls to form
+            this.Controls.Add(this.lblFile);
+            this.Controls.Add(this.txtFilePath);
+            this.Controls.Add(this.btnSelectFile);
+            this.Controls.Add(this.grpProtection);
+            this.Controls.Add(this.btnProtect);
+            this.Controls.Add(this.btnUnprotect);
+            this.Controls.Add(this.btnGetInfo);
+            this.Controls.Add(this.lblResult);
+            this.Controls.Add(this.txtResult);
+
+            // Event handlers
+            this.btnSelectFile.Click += BtnSelectFile_Click;
+            this.btnProtect.Click += BtnProtect_Click;
+            this.btnUnprotect.Click += BtnUnprotect_Click;
+            this.btnGetInfo.Click += BtnGetInfo_Click;
+            this.FormClosing += MainForm_FormClosing;
+        }
+
+        private void InitializeMip()
+        {
             try
             {
-                var rc = mip_init();
-                Log(rc == 0 ? "MIP bridge initialized" : $"MIP bridge init failed rc={rc}");
+                int rc = mip_init();
+                if (rc == 0)
+                {
+                    AppendResult("MIP bridge initialized successfully.");
+                }
+                else
+                {
+                    AppendResult($"MIP bridge initialization failed with error code: {rc}");
+                }
             }
             catch (Exception ex)
             {
-                Log($"Init error: {ex.Message}");
+                AppendResult($"Error initializing MIP bridge: {ex.Message}");
             }
         }
 
-        private void Log(string msg)
+        private void BtnSelectFile_Click(object sender, EventArgs e)
         {
-            _log.AppendText($"[{DateTime.Now:HH:mm:ss}] {msg}\r\n");
+            using (var ofd = new OpenFileDialog
+            {
+                Filter = "All Files (*.*)|*.*",
+                Title = "Select File"
+            })
+            {
+                if (ofd.ShowDialog(this) == DialogResult.OK)
+                {
+                    this.selectedFilePath = ofd.FileName;
+                    this.txtFilePath.Text = ofd.FileName;
+                    AppendResult($"Selected file: {ofd.FileName}");
+                }
+            }
+        }
+
+        private void BtnProtect_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(this.selectedFilePath))
+            {
+                AppendResult("Please select a file first.");
+                return;
+            }
+
+            if (!File.Exists(this.selectedFilePath))
+            {
+                AppendResult("Selected file does not exist.");
+                return;
+            }
+
+            try
+            {
+                AppendResult("Protecting file...");
+
+                string outFile = Path.ChangeExtension(this.selectedFilePath, ".mip.pfile");
+                string templateId = string.IsNullOrWhiteSpace(this.txtTemplateId.Text) ? null : this.txtTemplateId.Text;
+                string labelId = string.IsNullOrWhiteSpace(this.txtLabelId.Text) ? null : this.txtLabelId.Text;
+
+                int rc = mip_protect(this.selectedFilePath, outFile, templateId, labelId);
+
+                if (rc == 0)
+                {
+                    AppendResult($"File protected successfully: {outFile}");
+                    if (!string.IsNullOrEmpty(templateId))
+                        AppendResult($"  Template ID: {templateId}");
+                    if (!string.IsNullOrEmpty(labelId))
+                        AppendResult($"  Label ID: {labelId}");
+                }
+                else
+                {
+                    AppendResult($"Protection failed with error code: {rc}");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendResult($"Error protecting file: {ex.Message}");
+            }
+        }
+
+        private void BtnUnprotect_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(this.selectedFilePath))
+            {
+                AppendResult("Please select a file first.");
+                return;
+            }
+
+            if (!File.Exists(this.selectedFilePath))
+            {
+                AppendResult("Selected file does not exist.");
+                return;
+            }
+
+            try
+            {
+                AppendResult("Unprotecting file...");
+
+                string outFile = Path.ChangeExtension(this.selectedFilePath, ".mip.unprot");
+
+                int rc = mip_unprotect(this.selectedFilePath, outFile);
+
+                if (rc == 0)
+                {
+                    AppendResult($"File unprotected successfully: {outFile}");
+                }
+                else
+                {
+                    AppendResult($"Unprotection failed with error code: {rc}");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendResult($"Error unprotected file: {ex.Message}");
+            }
+        }
+
+        private void BtnGetInfo_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(this.selectedFilePath))
+            {
+                AppendResult("Please select a file first.");
+                return;
+            }
+
+            if (!File.Exists(this.selectedFilePath))
+            {
+                AppendResult("Selected file does not exist.");
+                return;
+            }
+
+            try
+            {
+                AppendResult("Getting protection information...");
+
+                StringBuilder sb = new StringBuilder(2048);
+                int rc = mip_getinfo(this.selectedFilePath, sb, sb.Capacity);
+
+                if (rc == 0)
+                {
+                    AppendResult("=== Protection Information ===");
+                    AppendResult(sb.ToString());
+                }
+                else
+                {
+                    AppendResult($"GetInfo failed with error code: {rc}");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendResult($"Error getting file information: {ex.Message}");
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                mip_cleanup();
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
+        }
+
+        private void AppendResult(string message)
+        {
+            if (this.txtResult.InvokeRequired)
+            {
+                this.txtResult.Invoke(new Action<string>(AppendResult), message);
+                return;
+            }
+
+            this.txtResult.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}\r\n");
+            this.txtResult.SelectionStart = this.txtResult.Text.Length;
+            this.txtResult.ScrollToCaret();
         }
     }
 }
-
-

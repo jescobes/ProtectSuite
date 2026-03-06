@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Deshabilitar completamente la restauración de NuGet -->
+  <PropertyGroup>
+    <RestorePackages>false</RestorePackages>
+    <SkipRestorePackages>true</SkipRestorePackages>
+    <SkipNuGetRestore>true</SkipNuGetRestore>
+    <RestoreProjectStyle>None</RestoreProjectStyle>
+    <IsRestoringPackage>false</IsRestoringPackage>
+  </PropertyGroup>
+  
+  <!-- Sobrescribir targets de NuGet para que no hagan nada -->
+  <Target Name="Restore" Condition="false" />
+  <Target Name="RestorePackages" Condition="false" />
+  <Target Name="_IsProjectRestoreSupported" Returns="@(_ValidProjectsForRestore)">
+    <!-- Retornar vacío para indicar que no se soporta restore -->
+  </Target>
+</Project>

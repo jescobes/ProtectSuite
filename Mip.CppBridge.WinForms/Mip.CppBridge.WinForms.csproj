@@ -6,12 +6,40 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <!-- Debug64 configuration targeting x64 -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\Debug64\</OutputPath>
+  </PropertyGroup>
+
+  <!-- Release64 configuration targeting x64 -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\Release64\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="runtimes\win-x64\native\Mip.NativeBridge.dll" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Reference to Mip.NativeBridge.dll -->
+    <None Include="..\Mip.NativeBridge\bin\$(Configuration)\x64\Mip.NativeBridge.dll" Condition="Exists('..\Mip.NativeBridge\bin\$(Configuration)\x64\Mip.NativeBridge.dll')">
+      <Link>Mip.NativeBridge.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- Also copy MIP SDK DLL if it exists -->
+    <None Include="..\Mip.NativeBridge\bin\$(Configuration)\x64\mip.dll" Condition="Exists('..\Mip.NativeBridge\bin\$(Configuration)\x64\mip.dll')">
+      <Link>mip.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Project reference to ensure bridge is built first -->
+  <ItemGroup>
+    <ProjectReference Include="..\Mip.NativeBridge\Mip.NativeBridge.vcxproj" Condition="'$(Configuration)' == 'Debug64' OR '$(Configuration)' == 'Release64'">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
-
-

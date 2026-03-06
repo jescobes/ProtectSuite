@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Msipc.CSharp.WinForms
 {
@@ -17,6 +19,7 @@ namespace Msipc.CSharp.WinForms
         private CheckBox chkExtract;
         private CheckBox chkComment;
         private CheckBox chkForward;
+        private CheckBox chkFullControl;
         private Button btnAdd;
         private Button btnRemove;
         private Button btnOK;
@@ -50,19 +53,19 @@ namespace Msipc.CSharp.WinForms
 
             this.lstUsers = new ListView();
             this.lstUsers.Location = new Point(12, 35);
-            this.lstUsers.Size = new Size(350, 300);
+            this.lstUsers.Size = new Size(350, 280);
             this.lstUsers.View = View.Details;
             this.lstUsers.FullRowSelect = true;
             this.lstUsers.GridLines = true;
-            this.lstUsers.Columns.Add("User", 150);
-            this.lstUsers.Columns.Add("Rights", 180);
+            this.lstUsers.Columns.Add("User", 120);
+            this.lstUsers.Columns.Add("Rights", 220);
             this.lstUsers.SelectedIndexChanged += LstUsers_SelectedIndexChanged;
 
             // Add user group
             this.grpAddUser = new GroupBox();
             this.grpAddUser.Text = "Add User";
             this.grpAddUser.Location = new Point(380, 35);
-            this.grpAddUser.Size = new Size(200, 300);
+            this.grpAddUser.Size = new Size(200, 295);
 
             this.lblUser = new Label();
             this.lblUser.Text = "User (email or ANYONE):";
@@ -115,15 +118,21 @@ namespace Msipc.CSharp.WinForms
             this.chkForward.Location = new Point(10, 215);
             this.chkForward.Size = new Size(80, 20);
 
+            this.chkFullControl = new CheckBox();
+            this.chkFullControl.Text = "FULL CONTROL";
+            this.chkFullControl.Location = new Point(10, 235);
+            this.chkFullControl.Size = new Size(120, 20);
+            this.chkFullControl.Checked = false;
+
             this.btnAdd = new Button();
             this.btnAdd.Text = "Add User";
-            this.btnAdd.Location = new Point(10, 245);
+            this.btnAdd.Location = new Point(10, 260);
             this.btnAdd.Size = new Size(80, 25);
             this.btnAdd.Click += BtnAdd_Click;
 
             this.btnRemove = new Button();
             this.btnRemove.Text = "Remove";
-            this.btnRemove.Location = new Point(100, 245);
+            this.btnRemove.Location = new Point(100, 260);
             this.btnRemove.Size = new Size(80, 25);
             this.btnRemove.Enabled = false;
             this.btnRemove.Click += BtnRemove_Click;
@@ -138,8 +147,22 @@ namespace Msipc.CSharp.WinForms
             this.grpAddUser.Controls.Add(this.chkExtract);
             this.grpAddUser.Controls.Add(this.chkComment);
             this.grpAddUser.Controls.Add(this.chkForward);
+            this.grpAddUser.Controls.Add(this.chkFullControl);
             this.grpAddUser.Controls.Add(this.btnAdd);
             this.grpAddUser.Controls.Add(this.btnRemove);
+
+            // Save/Load buttons
+            var btnSave = new Button();
+            btnSave.Text = "Save...";
+            btnSave.Location = new Point(12, 325);
+            btnSave.Size = new Size(80, 25);
+            btnSave.Click += BtnSave_Click;
+
+            var btnLoad = new Button();
+            btnLoad.Text = "Load...";
+            btnLoad.Location = new Point(100, 325);
+            btnLoad.Size = new Size(80, 25);
+            btnLoad.Click += BtnLoad_Click;
 
             // Buttons
             this.btnOK = new Button();
@@ -157,6 +180,8 @@ namespace Msipc.CSharp.WinForms
             this.Controls.Add(lblUsers);
             this.Controls.Add(this.lstUsers);
             this.Controls.Add(this.grpAddUser);
+            this.Controls.Add(btnSave);
+            this.Controls.Add(btnLoad);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.btnCancel);
 
@@ -175,12 +200,26 @@ namespace Msipc.CSharp.WinForms
 
             var rights = new System.Collections.ObjectModel.Collection<string>();
             if (this.chkView.Checked) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.ViewRight);
-            if (this.chkEdit.Checked) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.EditRight);
+            if (this.chkEdit.Checked)
+            {
+                rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.EditRight);
+                // Add DOCEDIT and SAVE when EDIT is selected
+                rights.Add("DOCEDIT");
+                rights.Add("SAVE");
+            }
             if (this.chkPrint.Checked) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.PrintRight);
             if (this.chkExport.Checked) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.ExportRight);
             if (this.chkExtract.Checked) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.ExtractRight);
             if (this.chkComment.Checked) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.CommentRight);
             if (this.chkForward.Checked) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.ForwardRight);
+            bool hasOwner = this.chkFullControl.Checked;
+            if (hasOwner) rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.OwnerRight);
+            
+            // Add VIEWRIGHTSDATA always, except when OWNER is selected (OWNER already includes it)
+            if (!hasOwner)
+            {
+                rights.Add(Microsoft.InformationProtectionAndControl.CommonRights.ViewRightsDataRight);
+            }
 
             if (rights.Count == 0)
             {
@@ -203,6 +242,7 @@ namespace Msipc.CSharp.WinForms
             this.chkExtract.Checked = false;
             this.chkComment.Checked = false;
             this.chkForward.Checked = false;
+            this.chkFullControl.Checked = false;
         }
 
         private void BtnRemove_Click(object sender, EventArgs e)
@@ -240,6 +280,129 @@ namespace Msipc.CSharp.WinForms
                 this.UserRightsList.AddRange(existingRights);
             }
             RefreshUserList();
+        }
+
+        private void BtnSave_Click(object sender, EventArgs e)
+        {
+            if (this.UserRightsList.Count == 0)
+            {
+                MessageBox.Show("No user rights to save.", "Save User Rights", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var saveDialog = new SaveFileDialog())
+            {
+                saveDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                saveDialog.FilterIndex = 1;
+                saveDialog.DefaultExt = "json";
+                saveDialog.FileName = "custom_rights.json";
+                saveDialog.Title = "Save Custom User Rights";
+
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        var rightsData = new List<UserRightsData>();
+                        foreach (var ur in this.UserRightsList)
+                        {
+                            rightsData.Add(new UserRightsData
+                            {
+                                UserId = ur.UserId,
+                                UserIdType = ur.UserIdType.ToString(),
+                                Rights = ur.Rights.ToList()
+                            });
+                        }
+
+                        string json = JsonConvert.SerializeObject(rightsData, Formatting.Indented);
+                        File.WriteAllText(saveDialog.FileName, json);
+                        MessageBox.Show($"User rights saved successfully to:\n{saveDialog.FileName}", "Save Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error saving user rights: {ex.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void BtnLoad_Click(object sender, EventArgs e)
+        {
+            using (var openDialog = new OpenFileDialog())
+            {
+                openDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                openDialog.FilterIndex = 1;
+                openDialog.DefaultExt = "json";
+                openDialog.FileName = "custom_rights.json";
+                openDialog.Title = "Load Custom User Rights";
+
+                if (openDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string json = File.ReadAllText(openDialog.FileName);
+                        var rightsData = JsonConvert.DeserializeObject<List<UserRightsData>>(json);
+
+                        if (rightsData == null || rightsData.Count == 0)
+                        {
+                            MessageBox.Show("The file does not contain valid user rights data.", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        // Ask user if they want to replace or append
+                        var result = MessageBox.Show(
+                            $"Load {rightsData.Count} user right(s) from file?\n\n" +
+                            "Yes = Replace current rights\n" +
+                            "No = Append to current rights\n" +
+                            "Cancel = Do nothing",
+                            "Load User Rights",
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxIcon.Question);
+
+                        if (result == DialogResult.Cancel)
+                        {
+                            return;
+                        }
+
+                        if (result == DialogResult.Yes)
+                        {
+                            this.UserRightsList.Clear();
+                        }
+
+                        foreach (var data in rightsData)
+                        {
+                            try
+                            {
+                                var userIdType = (Microsoft.InformationProtectionAndControl.UserIdType)Enum.Parse(
+                                    typeof(Microsoft.InformationProtectionAndControl.UserIdType),
+                                    data.UserIdType);
+                                
+                                var rightsCollection = new System.Collections.ObjectModel.Collection<string>(data.Rights);
+                                var userRights = new Microsoft.InformationProtectionAndControl.UserRights(userIdType, data.UserId, rightsCollection);
+                                this.UserRightsList.Add(userRights);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Error loading user rights for {data.UserId}: {ex.Message}", "Load Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                        }
+
+                        RefreshUserList();
+                        MessageBox.Show($"Loaded {rightsData.Count} user right(s) successfully.", "Load Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error loading user rights: {ex.Message}", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        // Helper class for JSON serialization
+        private class UserRightsData
+        {
+            public string UserId { get; set; }
+            public string UserIdType { get; set; }
+            public List<string> Rights { get; set; }
         }
     }
 }

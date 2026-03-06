@@ -1,5 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Deshabilitar NuGet ANTES de importar cualquier cosa -->
+  <PropertyGroup>
+    <SkipNuGetRestore>true</SkipNuGetRestore>
+    <SkipRestorePackages>true</SkipRestorePackages>
+    <RestorePackages>false</RestorePackages>
+    <RestoreProjectStyle>None</RestoreProjectStyle>
+    <IsRestoringPackage>false</IsRestoringPackage>
+    <EnableNuGetRestore>false</EnableNuGetRestore>
+    <!-- Evitar que MSBuild valide RuntimeIdentifier -->
+    <ValidateNuGetPackageReferences>false</ValidateNuGetPackageReferences>
+    <SkipValidateNuGetPackageReferences>true</SkipValidateNuGetPackageReferences>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,6 +24,10 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <RestorePackages>false</RestorePackages>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+    <RuntimeIdentifier>win</RuntimeIdentifier>
+    <RuntimeIdentifiers>win;win-x64;win-x86</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -28,25 +44,6 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug64|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug64\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release64|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release64\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -70,37 +67,44 @@
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TemplatePickerDialog.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TemplatePickerDialog.Designer.cs">
-      <DependentUpon>TemplatePickerDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="UserRightsEditorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UserRightsEditorDialog.Designer.cs">
-      <DependentUpon>UserRightsEditorDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="SafeNativeMethods.cs" />
-    <Compile Include="IpcManagedAPI.cs" />
-    <Compile Include="IpcManagedAPIWrapper.cs" />
+    <Compile Include="UnsafeNativeMethods.cs" />
+    <Compile Include="SafeFileApiNativeMethods.cs" />
+    <Compile Include="UnsafeFileApiNativeMethods.cs" />
+    <Compile Include="ManagedAPIClasses.cs" />
+    <Compile Include="NativeAPIStructures.cs" />
+    <Compile Include="ILockBytesOverStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="..\config\adrms.json">
+      <Link>config\adrms.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Identity.Client, Version=4.61.3.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Identity.Client.4.61.3\lib\net472\Microsoft.Identity.Client.dll</HintPath>
+    <!-- Referencias directas a DLLs sin usar NuGet packages.config -->
+    <Reference Include="Microsoft.Identity.Client">
+      <HintPath>bin\Debug\net472\Microsoft.Identity.Client.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net472\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>bin\Debug\net472\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <!-- Deshabilitar completamente los targets de NuGet -->
+  <PropertyGroup>
+    <IsRestoringPackage>false</IsRestoringPackage>
+    <RestorePackages>false</RestorePackages>
+    <SkipRestorePackages>true</SkipRestorePackages>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

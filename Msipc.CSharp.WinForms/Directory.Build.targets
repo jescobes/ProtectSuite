@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Sobrescribir targets de NuGet para deshabilitarlos completamente -->
+  <Target Name="Restore" Condition="false" />
+  <Target Name="RestorePackages" Condition="false" />
+  <Target Name="_IsProjectRestoreSupported" Returns="@(_ValidProjectsForRestore)" Condition="false" />
+  <Target Name="ValidateNuGetPackageReferences" Condition="false" />
+</Project>

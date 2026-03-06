@@ -1,14 +1,8 @@
 {
-	"serverUrl": "https://adrms.contoso.com/_wmcs/Certification",
-	"useModernAuth": false,
-	"username": "",
-	"password": "",
-	"domain": "",
-	"applicationId": "",
-	"tenantId": "",
-	"certificateThumbprint": "",
-	"useProxy": false,
-	"proxyUrl": ""
+	"serverUrl": "https://protection.sealpath.com/",
+	"extranetUrl": "",
+	"intranetUrl": "",
+	"licensingOnlyClusters": false
 }
 
 

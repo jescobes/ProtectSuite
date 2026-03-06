@@ -18,6 +18,7 @@ using System.Globalization;
 using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Threading;
+using System.IO;
 
 namespace Microsoft.InformationProtectionAndControl
 {
@@ -95,7 +96,42 @@ namespace Microsoft.InformationProtectionAndControl
                 throw new Exception(INSTALL_LOCATION_VALUE + " not found");
             }
 
-            bool configSuccessful = UnsafeNativeMethods.SetDllDirectory(installLocation);
+            // MSIPC InstallLocation from registry typically points to the 64-bit client installation:
+            // "C:\Program Files\Cliente 2.1 de Active Directory Rights Management Services\"
+            // For 32-bit processes, we need to use the 32-bit client installation:
+            // "C:\Program Files (x86)\Cliente 2.1 de Active Directory Rights Management Services\"
+            // We detect the process architecture and adjust the path accordingly
+            string dllDirectory = installLocation;
+            
+            // Detect process architecture at runtime
+            bool is64BitProcess = (IntPtr.Size == 8);
+            
+            // If the process is 32-bit and InstallLocation points to Program Files (64-bit),
+            // we need to redirect to Program Files (x86) (32-bit)
+            if (!is64BitProcess && installLocation.Contains("Program Files\\") && !installLocation.Contains("Program Files (x86)"))
+            {
+                // Replace "Program Files" with "Program Files (x86)" for 32-bit processes
+                string x86Path = installLocation.Replace("Program Files\\", "Program Files (x86)\\");
+                if (Directory.Exists(x86Path))
+                {
+                    dllDirectory = x86Path;
+                }
+            }
+            
+            // Also check for architecture-specific subdirectories (x86/x64) if they exist
+            // Some SDK installations might have DLLs in subdirectories
+            if (!installLocation.EndsWith("\\x86", StringComparison.OrdinalIgnoreCase) &&
+                !installLocation.EndsWith("\\x64", StringComparison.OrdinalIgnoreCase))
+            {
+                string archSubdir = is64BitProcess ? "x64" : "x86";
+                string archSpecificPath = Path.Combine(dllDirectory, archSubdir);
+                if (Directory.Exists(archSpecificPath))
+                {
+                    dllDirectory = archSpecificPath;
+                }
+            }
+
+            bool configSuccessful = UnsafeNativeMethods.SetDllDirectory(dllDirectory);
             if (false == configSuccessful)
             {
                 throw new Exception("SetDllDirectory failed with " + Marshal.GetLastWin32Error());
