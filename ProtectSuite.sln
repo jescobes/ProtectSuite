@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -11,7 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Msipc.CSharp.WinForms", "Ms
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Msipc.CSharp.WinForms", "Tests.Msipc.CSharp.WinForms\Tests.Msipc.CSharp.WinForms.csproj", "{B1C2D3E4-F5A6-4B7C-8D9E-0F1A2B3C4D5E}"
 EndProject
- 
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Mip.CSharp.WinForms", "Tests.Mip.CSharp.WinForms\Tests.Mip.CSharp.WinForms.csproj", "{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}"
+EndProject
+
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Msipc.Cpp.Win32", "Msipc.Cpp.Win32\Msipc.Cpp.Win32.vcxproj", "{E8C1B9A0-1B1D-4F8C-9C6D-9C2B3B4D9D21}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mip.NativeBridge", "Mip.NativeBridge\Mip.NativeBridge.vcxproj", "{44D3B2C1-6D6E-4B64-9C10-3A1BA5A0D1B0}"
@@ -61,6 +63,14 @@ Global
 		{B1C2D3E4-F5A6-4B7C-8D9E-0F1A2B3C4D5E}.Debug64|Any CPU.Build.0 = Debug64|Any CPU
 		{B1C2D3E4-F5A6-4B7C-8D9E-0F1A2B3C4D5E}.Release64|Any CPU.ActiveCfg = Release64|Any CPU
 		{B1C2D3E4-F5A6-4B7C-8D9E-0F1A2B3C4D5E}.Release64|Any CPU.Build.0 = Release64|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Debug64|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Debug64|Any CPU.Build.0 = Debug|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Release64|Any CPU.ActiveCfg = Release|Any CPU
+		{C2D3E4F5-A6B7-4C8D-9E0F-1A2B3C4D5E6F}.Release64|Any CPU.Build.0 = Release64|Any CPU
 		{E8C1B9A0-1B1D-4F8C-9C6D-9C2B3B4D9D21}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{E8C1B9A0-1B1D-4F8C-9C6D-9C2B3B4D9D21}.Debug|Any CPU.Build.0 = Debug|x64
 		{E8C1B9A0-1B1D-4F8C-9C6D-9C2B3B4D9D21}.Release|Any CPU.ActiveCfg = Release|x64

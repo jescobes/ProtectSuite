@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Target Name="Restore" Condition="false" />
+  <Target Name="RestorePackages" Condition="false" />
+  <Target Name="_IsProjectRestoreSupported" Returns="@(_ValidProjectsForRestore)" />
+</Project>
